@@ -1,5 +1,12 @@
 function export
-  set var1 (echo $argv | cut -f1 -d=)
-  set var2 (echo $argv | cut -f2 -d=)
-  set -x -g $var1 $var2
+  if test -n "$argv"
+    set  __args $argv
+  else if command [ -p /dev/stdin ]
+    while read line; set __args $__args $line; end
+  else
+    echo "Error: Argument is required."
+    exit 1
+  end
+  set --local cmds (echo $__args | xargs -n1 | xargs -n1 echo "set $0" | sed -e "s/=/ /;s/\$/\;/")
+  eval $cmds
 end
